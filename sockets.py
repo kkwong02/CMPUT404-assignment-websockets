@@ -14,13 +14,14 @@
 # limitations under the License.
 #
 import flask
-from flask import Flask, request
+from flask import Flask, request, send_from_directory, redirect, url_for, jsonify
 from flask_sockets import Sockets
 import gevent
 from gevent import queue
 import time
 import json
 import os
+
 
 app = Flask(__name__)
 sockets = Sockets(app)
@@ -31,7 +32,7 @@ class World:
         self.clear()
         # we've got listeners now!
         self.listeners = list()
-        
+
     def add_set_listener(self, listener):
         self.listeners.append( listener )
 
@@ -55,21 +56,21 @@ class World:
 
     def get(self, entity):
         return self.space.get(entity,dict())
-    
+
     def world(self):
         return self.space
 
-myWorld = World()        
+myWorld = World()
 
 def set_listener( entity, data ):
     ''' do something with the update ! '''
 
 myWorld.add_set_listener( set_listener )
-        
-@app.route('/')
-def hello():
-    '''Return something coherent here.. perhaps redirect to /static/index.html '''
-    return None
+
+@app.route("/")
+def index():
+    return redirect((url_for("serve_static", filename="index.html")))
+
 
 def read_ws(ws,client):
     '''A greenlet function that reads from the websocket and updates the world'''
@@ -101,12 +102,12 @@ def update(entity):
     '''update the entities via this interface'''
     return None
 
-@app.route("/world", methods=['POST','GET'])    
+@app.route("/world", methods=['POST','GET'])
 def world():
     '''you should probably return the world here'''
     return None
 
-@app.route("/entity/<entity>")    
+@app.route("/entity/<entity>")
 def get_entity(entity):
     '''This is the GET version of the entity interface, return a representation of the entity'''
     return None
